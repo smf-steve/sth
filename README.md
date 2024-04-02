@@ -8,11 +8,13 @@
       - a summary of activities is emitted to stdout
       - a transcription of activities is emitted to stderr
 
-   1. sth_execute {file} [ {driver} ]
-      - presumes {file} is either {test}.config or {test}.case
-      - a utility script that executes one set of test cases
-      - output is restricted to the users program
+   1. sth_execute {directory | file} [ {driver} ]
+      - Identical functional of sth_validate except for the generated output
+      - Output is restricted to that the execution and not the validation process. I.e., 
+        - no summary information is presented to stdout
+        - no transcription of activites is presented to stderr
       - useful prior to the automated testing/validation process
+
         
 ## Files:
    1. sth.bash: a bash script that is inteded to be source into the user environment
@@ -37,6 +39,7 @@ $ sth_execute ../test_case/binaryReal_0.case mips_subroutine
 v0:         10; 0x00 00 00 0A; 0b0000 0000 0000 0000 0000 0000 0000 1010;
 $
 ```
+
 Contents of ../test_case/binaryReal_0.case
 ```
 PROG=

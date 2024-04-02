@@ -88,10 +88,11 @@
 #      - a summary of activities is emitted to stdout
 #      - a transcription of activities is emitted to stderr
 #
-#   1. sth_execute {file} [ {driver} ]
-#      - presumes {file} is either {test}.config or {test}.case
-#      - a utility script that executes one set of test cases
-#      - output is restricted to the users program
+#   1. sth_execute {directory | file} [ {driver} ]
+#      - Identical functional of sth_validate except for the generated output
+#      - Output is restricted to that the execution and not the validation process. I.e., 
+#        - no summary information is presented to stdout
+#        - no transcription of activites is presented to stderr
 #      - useful prior to the automated testing/validation process
 #
 # INTERNAL FUNCTIONS
@@ -129,18 +130,13 @@ function sth_execute () {
     local driver="$2"
     local return_val=
 
-    [[ -d "${config}" ]] && {
-       echo "Error: ${config} is a Directory, expected {file}.case as argument!"
-       #return 1
-    }
-
-    OLD_STH_EXECUTE_ONLY=${STH_EXECUTE_ONLY}    
+    STH_OLD_EXECUTE_ONLY=${STH_EXECUTE_ONLY}    
     STH_EXECUTE_ONLY=TRUE
     
     sth_validate "$config" ${driver}
     return_val="$?"
 
-    STH_EXECUTE_ONLY=${OLD_STH_EXECUTE_ONLY}
+    STH_EXECUTE_ONLY=${STH_OLD_EXECUTE_ONLY}
     
     return ${ret_val}
   )
