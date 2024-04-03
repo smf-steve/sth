@@ -1,0 +1,183 @@
+#! /bin/bash
+
+# Simple Test Harness (sth)
+###########################
+# MAIN ROUTINE
+#
+#   1. sth_validate {directory | pathspec} [ {driver} ]
+#      - for each of the {test}.config and {test}.case files in {directory}
+#        executes and validates each associated test case.
+#      - the optional {driver} overrides the {DRIVER} value defined within {test}.config
+#      - a summary of activities is emitted to stdout
+#      - a transcription of activities is emitted to stderr
+#
+# SUPPORTING FUNCTIONS
+#   1. sth_case_validate [ {driver} ]
+#      - executes a single test case based upon the defined ENV variables
+#      - the optional {driver} overrides the {DRIVER} value defined for all test cases
+#
+#   1. sth_config_reader   {file}
+#      - reads a file and generates a set of temporary files, one per test case
+#
+#   1. sth_strips_comments  {file}
+#      - strips comments and blank lines from a given file
+#
+
+export STH_TMPDIR=/tmp/STH.$$
+
+
+function sth_validate () {
+  local file_dir="$1"
+  local driver="$2" 
+
+  local return_val=
+  local count=0
+  local passed=0
+  local test_case=
+
+  local files=
+  [[ -d ${file_dir} ]] && files=$(echo ${file_dir}/*.config ${file_dir}/*.case)
+  [[ -z "${files}"  ]] && files=$(echo $file_dir)
+
+  mkdir -p ${STH_TMPDIR}
+  for f in ${files} ; do 
+    [[ ! -s $f ]] && continue
+
+    rm -rf ${STH_TMPDIR}/*
+    sth_config_reader ${f}
+       # create individual files  
+       #   1. the 'default' file
+       #   1. the 'global' file
+       #   1. a set of test cases: *.case
+    for test_case in ${STH_TMPDIR}/*.case ; do
+      source ${STH_TMPDIR}/default
+      source ${test_case}
+      source ${STH_TMPDIR}/global
+
+      # Overide Environment Variables with STH specific ENV VARABLES
+      [[ -n ${STH_DRIVER} ]]  && DRIVER=${STH_DRIVER}
+      [[ -n ${STH_OPTIONS} ]] && OPTIONS=${STH_OPTIONS}
+      [[ -n ${STH_ENTRY} ]]   && ENTRY=${STH_ENTRY}
+      [[ -n ${STH_ARGS} ]]    && ARGS=${STH_ARGS}
+      [[ -n ${STH_INPUT} ]]   && INPUT=${STH_INPUT}
+      [[ -n ${STH_OUTPUT} ]]  && OUTPUT=${STH_OUTPUT}
+      [[ -n ${STH_RETVAL} ]]  && RETVAL=${STH_RETVAL}
+
+      if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
+        OUTPUT=''
+        RETVAL=''
+      fi
+      sth_case_validate ${driver}
+      return_val=$?
+
+      [[ ${return_val} == 0 ]] && ((passed ++))
+      (( count ++ ))
+    done
+  done
+  rm -fr ${STH_TMPDIR}
+
+  if [[ ${STH_EXECUTE_ONLY} = "TRUE" ]] ; then
+    return ${return_val}
+  else
+    echo "Summary: ${passed}/${count}  (Passed/Count)"
+    return $((  count - passed ))
+  fi
+}
+
+
+function sth_strip_comments () {
+  cat "$1" | sed -e '/^ *#.*/d' -e '/^ *$/d'
+}
+
+function sth_case_validate () {
+  (   
+    local driver="$1"
+    local failed=2
+
+
+    [[ -n ${driver} ]] && DRIVER=${driver}
+    [[ -z ${DRIVER} ]] && { echo "Driver Program is undefined"; return 1; }
+    [[ -z ${INPUT}  ]] && INPUT=/dev/null
+    [[ -z ${OUTPUT} ]] && OUTPUT=/dev/null
+
+    SHOW_INPUT='cat'
+    SHOW_OUTPUT='cat'
+    [[ ! -f ${INPUT}  ]] && SHOW_INPUT='echo'
+    [[ ! -f ${OUTPUT} ]] && SHOW_OUTPUT='echo'
+
+    actual_return=
+    actual_output="${STH_TMPDIR}/${DRIVER}.output"      
+
+    echo "Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
+    ${SHOW_INPUT} ${INPUT} | eval ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS} > ${actual_output}
+    actual_return="$?"
+
+    # PROCESS the OUTPUT
+    if [[ ${OUTPUT} != '/dev/null' ]] ; then
+      ${SHOW_OUTPUT} ${OUTPUT} | diff -q - ${actual_output} >/dev/null
+      if [[  $? != 0 ]] ; then
+        echo "    Error: Incorrect Output"
+        echo
+        (( failed ++ ))
+      fi
+      echo "Correct Output followed by Your Output"
+      echo "=============="
+      ${SHOW_OUTPUT}  ${OUTPUT}
+      echo "=============="
+      cat  ${actual_output} 
+      echo "=============="
+      rm -f ${actual_output}
+    else
+      cat ${actual_output}  >$(tty)
+    fi
+    rm -f ${actual_output}
+
+    # Process the RETURN VALUE
+    if [[ -n ${RETVAL} ]] ; then
+      if [[ ${RETVAL} != ${actual_return} ]] ; then
+        echo "    Error: Expected Return Value: ${RETVAL}"
+        echo "           Your Return Value: ${actual_return}"
+        (( failed ++ ))
+      fi
+    fi 
+    if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
+      return ${actual_return}
+    else
+      echo
+      (( failed == 0 ))
+    fi
+  )
+ } > /dev/stderr
+
+
+function sth_config_reader () {
+  local config_file=$1
+
+  local count=0
+  local output=${STH_TMPDIR}/${count}.case
+
+  cat /dev/null > ${STH_TMPDIR}/default
+  cat /dev/null > ${STH_TMPDIR}/global
+  while read -r _line ; do
+    case "${_line}" in
+       \[default\]* ) output=${STH_TMPDIR}/default
+                      ;;
+
+       \[global\]*  ) output=${STH_TMPDIR}/global
+                      ;;
+
+       \[case\]*    ) ((count ++))
+                      output=${STH_TMPDIR}/${count}.case
+                      ;; 
+
+       *            ) echo "${_line}" >> ${output}
+                      ;;
+    esac
+  done < <( sth_strip_comments ${config_file} )
+}
+
+
+sth_validate "$@"
+
+
+

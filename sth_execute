@@ -1,0 +1,34 @@
+#! /bin/bash
+
+# Simple Test Harness (sth)
+###########################
+# MAIN ROUTINE
+#
+#   1. sth_execute {directory | pathspec } [ {driver} ]
+#      - Identical functional of sth_validate except for the generated output
+#      - Output is restricted to that the execution and not the validation process. I.e., 
+#        - no summary information is presented to stdout
+#        - no transcription of activites is presented to stderr
+#      - useful prior to the automated testing/validation process
+#
+
+function sth_execute () {
+  (
+    local config="$1"
+    local driver="$2"
+    local return_val=
+
+    STH_OLD_EXECUTE_ONLY=${STH_EXECUTE_ONLY}    
+    STH_EXECUTE_ONLY=TRUE
+    
+    sth_validate "$config" ${driver}
+    return_val="$?"
+
+    STH_EXECUTE_ONLY=${STH_OLD_EXECUTE_ONLY}
+    
+    return ${ret_val}
+  )
+}
+
+
+sth_execute "$@"
