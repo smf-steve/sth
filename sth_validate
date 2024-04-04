@@ -9,7 +9,7 @@
 #        * if a {pathspec} is a directory, then every file with .sth_case.
 #      - During execution:
 #        * each test case is validated
-#        * transcript of activities are emitted to stderr
+#        * a transcript of activities is emitted to stderr
 #        * a summary of activities is emitted to stdout
 #      - The exit status ($?) is set to 0 for SUCCESS, when ALL test cases pass
 #
@@ -71,36 +71,40 @@ function sth_validate () {
 
       # Check that the required VARIABLES are defined
       if [[ -z ${ENTRY} ]]  ||  [[ -z ${EXITVAL} ]] ; then
-        echo "Error: Invalid test case in ${f}, skipping..." >$(tty)
+        echo "Error: Invalid test case in ${f}, skipping..." >/dev/stderr
         continue
       fi
 
       sth_case_validate
       exit_val=$?
-      echo
+      echo > /dev/stderr
 
       [[ ${exit_val} == 0 ]] && ((passed ++))
       (( count ++ ))
     done
   done
   if (( count == 0 )) ; then 
-     echo "Error: No files with a .sth_case extension provided." >$(tty)
+     echo "Error: No files with a .sth_case extension provided." > /dev/stderr
      return 1
   fi
   rm -fr ${STH_TMPDIR}
 
   if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then
-    return ${exit_val}
+    : #return ${exit_val}
   else
     echo "Summary: ${passed}/${count}  (Passed/Count)"  >$(tty)
-    return $((  count - passed ))
+    #return $((  count - passed ))
   fi
+  return $((  count - passed ))
 }
 
 
 function sth_case_validate () {
   (   
+
     local failed=0
+    local output_error=0
+    local exit_error=0
 
     [[ -z ${DRIVER} ]] && DRIVER=${eval} && OPTIONS=""
     [[ -z ${INPUT}  ]] && INPUT=/dev/null
@@ -116,28 +120,39 @@ function sth_case_validate () {
     actual_output="${STH_TMPDIR}/${DRIVER}.output"      
 
     if [[ -z ${DRIVER} ]] ; then 
-      echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
+      echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}" 
       ${SHOW_INPUT} ${INPUT} | eval ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS} > ${actual_output}
       actual_exit_val="$?"
     else
-      echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
-      ${SHOW_INPUT} ${INPUT} | ${ENTRY} ${ARGS} > ${actual_output}
+      echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}" 
+      ${SHOW_INPUT} ${INPUT} |                           ${ENTRY} ${ARGS} > ${actual_output}
       actual_exit_val="$?"
-    fi     
+    fi
 
-    cat ${actual_output}
+    # Determine if the test case failed
+    ${SHOW_OUTPUT} ${OUTPUT} | diff -q - ${actual_output} >/dev/null
+    output_error=$?
+
+    [[ ${EXITVAL} == ${actual_exit_val} ]]
+    exit_error=$?
+
+    if [[ ${output_error} != 0 ]] || [[ ${exit_error} != 0 ]] ; then
+      failed=1
+    fi
+
+    cat ${actual_output} #| tee /dev/stdout
+    # the above puts the output in both stderr and stdout
+    # this is okay if they are different
     # Provide a transcript of activities
+
     if [[ ${STH_EXECUTE_ONLY} != "TRUE" ]] ; then 
       # PROCESS stdout
-      ${SHOW_OUTPUT} ${OUTPUT} | diff -q - ${actual_output} >/dev/null
-      output_error=$?
       if [[  ${output_error} != 0 ]] ; then
         echo "# =========================="
         echo "# Error: Correct Output is:"
         echo "# =========================="
         ${SHOW_OUTPUT}  ${OUTPUT}
         echo "# =========================="
-        (( failed ++ ))
       fi
 
       # Process the EXIT VALUE
@@ -145,18 +160,12 @@ function sth_case_validate () {
         echo
         echo "# Expected Exit Value: ${EXITVAL}"
         echo "# Actual   Exit Value: ${actual_exit_val}"
-        (( failed ++ ))
       fi
-    fi >/dev/stderr
+    fi 
 
-    # Now return either the actual_exit_val or the failed count
-    if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
-      (( actual_exit_val == 0 ))
-    else
-      (( failed == 0 ))
-    fi
+    (( failed == 0 ))
   )
- }
+ } >/dev/stderr
 
 
 function sth_config_reader () {
