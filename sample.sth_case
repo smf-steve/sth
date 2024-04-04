@@ -5,7 +5,7 @@
 # In this test case, the following variables can be defined.  The last test case in 
 # this file is for the example data in the table below.
 #
-# | ENV      | Description                          | Example                 | Option    |
+# | VARIABLE | Description                          | Example                 | Option    |
 # |----------|--------------------------------------|-------------------------|-----------|
 # | DRIVER   | The default driver program           | java_subroutine         | Parameter |
 # | OPTIONS  | The options passed to ${DRIVER}      | "-L '*.j'"              | Optional  |
