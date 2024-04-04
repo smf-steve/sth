@@ -21,7 +21,7 @@
         * the validating step is skipped 
         * no transcript of activities are emitted to stdout
         * no summary information is presented
-      - The exist status ($?) is set to the result of the last test case
+     - The exit status ($?) is set to 0 for SUCCESS, when ALL test cases pass
 
 ## Demonstrative Example
 
