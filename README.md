@@ -6,9 +6,9 @@
 
    The STH system, however, has been developed to function without a driver program.  Hence, creating greater functionality.
 
-## Demostrative Example[^1]
+## Demostrative Example
 
-   Consider a program that calculates the sum of a series of number from 1..10.  For example.
+   Consider our exampl program[^1] that calculates the sum of a series of number from 1..10.  For example.
 
    ```bash
    $ sum 1 10
@@ -20,7 +20,7 @@
 
    We have defined two such test cases within the files `sum_1..10.sth_case` and `sum_0..10.sth_case`.  We can then use the `sth_validate` command to execute these two test case.  As a result, we can detect a problem with the "sum" program.
 
-   1. Test case 1:
+   * Test case 1:
       ```bash
       $ sth_validate sum_1..10.sth_case
       # Testing:   ./sum 1 10
@@ -29,7 +29,7 @@
       Summary: 1/1  (Passed/Count)
       ```
 
-   1. Test case 2:
+   * Test case 2:
       ```bash
       $ sth_validate sum_0..10.sth_case
       # Testing:   ./sum 0 10
@@ -47,7 +47,7 @@
 
    Consider the following example where the first argument to sth_validate is the current working directory (.).  In this case, all the files within the current working directory (.) is executed.  A summary message is provided at the end of execution.
 
-   1. Test case 3:
+   * Test case 3:
       ```bash
       $ sth_validate .
       # Testing:   ./sum 0 10
@@ -67,25 +67,26 @@
       $
       ```
 
-   The current working directory the following two files:
+   * Example .sth_case files
 
-   ```bash
-   $ cat sum_1..10.sth_case
-   [case]
-   ENTRY=./sum
-   ARGS='1 10'   
-   OUTPUT="55"
-   $ cat sum_0..10.sth_case
-   [case]
-   ENTRY=./sum
-   ARGS='0 10'
-   OUTPUT="55"
-   $
-   ```
+      ```bash
+      $ cat sum_1..10.sth_case
+      [case]
+      ENTRY=./sum
+      ARGS='1 10'   
+      OUTPUT="55"
+      $ cat sum_0..10.sth_case
+      [case]
+      ENTRY=./sum
+      ARGS='0 10'
+      OUTPUT="55"
+      $
+      ```
+      
    [^1] All these tests cases are in the [example](https://github.com/smf-steve/sth/tree/main/example) subdirectory
 
 
-## Commands: (Bash functions)
+## Commands:
    1. sth_validate {pathspec}... 
       - Executes and validates each test case that is provided in {pathspec}
         * if a {pathspec} is a directory, then every file with .sth_case.
@@ -144,13 +145,16 @@ Notes:
 
 You can modify the behavior of the 'sth_validate' and 'sth_execute' by the use of environment variables.  The variables can be used to override particular VARIABLE for a test case.  The following environment variables are defined:
 
-  * STH_EXECUTE_ONLY : overides the behavior of std_validate to be quivelent to std_execute
-  * STH_DRIVER  : overides the VARIABLE "DRIVER" within all '.sth_case' files
-  * STH_OPTIONS : overides the VARIABLE "OPTIONS" within all '.sth_case' files
-  * STH_ENTRY   : overides the VARIABLE "ENTRY" within all '.sth_case' files
-  * STH_ARGS    : overides the VARIABLE "ARGS" within all '.sth_case' files
-  * STH_INPUT   : overides the VARIABLE "INPUT" within all '.sth_case' files
-  * STH_OUTPUT  : overides the VARIABLE "OUTPUT" within all '.sth_case' files
-  * STH_EXITVAL : overides the VARIABLE "EXITVAL" within all '.sth_case' files
+  | VARIABLE          | Overrides Variable with .sth_case files |
+  |-------------------|-------------|
+  | STH_DRIVER        | DRIVER      |
+  | STH_OPTIONS       | OPTIONS     |
+  | STH_ENTRY         | ENTRY       |
+  | STH_ARGS          | ARGS        |
+  | STH_INPUT         | INPUT       |
+  | STH_OUTPUT        | OUTPUT      |
+  | STH_EXITVAL       | EXITVAL     |
+
+Additionly, you can define the STH_EXECUTE_ONLY to be "TRUE" to modify the behavior of std_validate to be quivelent to std_execute.
 
 
