@@ -4,15 +4,18 @@
 ###########################
 # MAIN ROUTINE
 #
-#   1. sth_validate {directory | pathspec} [ {driver} ]
-#      - for each of the {test}.config and {test}.case files in {directory}
-#        executes and validates each associated test case.
-#      - the optional {driver} overrides the {DRIVER} value defined within {test}.config
-#      - a summary of activities is emitted to stdout
-#      - a transcription of activities is emitted to stderr
+#   1. sth_validate {pathspec}... 
+#      - Executes and validates each test case that is provided in {pathspec}
+#        * if a {pathspec} is a directory, then every file with .sth_case.
+#      - During execution:
+#        * each test case is validated
+#        * transcript of activities are emitted to stderr
+#        * a summary of activities is emitted to stdout
+#      - The exit status ($?) is set to 0 for SUCCESS, when ALL test cases pass
+#
 #
 # SUPPORTING FUNCTIONS
-#   1. sth_case_validate [ {driver} ]
+#   1. sth_case_validate
 #      - executes a single test case based upon the defined ENV variables
 #      - the optional {driver} overrides the {DRIVER} value defined for all test cases
 #
@@ -37,7 +40,7 @@ function sth_validate () {
   local files=
 
   for f in ${file_dir} ; do
-     [[ -d ${f}  ]]  && files="$files $(echo ${f}/*.config ${f}/*.case)"
+     [[ -d ${f}  ]]  && files="$files $(echo ${f}/*.sth_case)"
      [[ -f ${f}  ]]  && files="$files $f"
   done
 
@@ -50,13 +53,13 @@ function sth_validate () {
        # create individual files  
        #   1. the 'default' file
        #   1. the 'global' file
-       #   1. a set of test cases: *.case
-    for test_case in ${STH_TMPDIR}/*.case ; do
+       #   1. a set of test cases: *.sth_case
+    for test_case in ${STH_TMPDIR}/*.sth_case ; do
       source ${STH_TMPDIR}/default
       source ${test_case}
       source ${STH_TMPDIR}/global
 
-      # Overide Environment Variables with STH specific ENV VARABLES
+      # Override Environment Variables with STH specific ENV VARIABLES
       [[ -n "${STH_DRIVER}"  ]] && DRIVER=${STH_DRIVER}
       [[ -n "${STH_OPTIONS}" ]] && OPTIONS=${STH_OPTIONS}
       [[ -n "${STH_ENTRY}"   ]] && ENTRY=${STH_ENTRY}
@@ -148,7 +151,7 @@ function sth_config_reader () {
   local config_file=$1
 
   local count=0
-  local output=${STH_TMPDIR}/${count}.case
+  local output=${STH_TMPDIR}/${count}.sth_case
 
   cat /dev/null > ${STH_TMPDIR}/default
   cat /dev/null > ${STH_TMPDIR}/global
@@ -161,7 +164,7 @@ function sth_config_reader () {
                       ;;
 
        \[case\]*    ) ((count ++))
-                      output=${STH_TMPDIR}/${count}.case
+                      output=${STH_TMPDIR}/${count}.sth_case
                       ;; 
 
        *            ) echo "${_line}" >> ${output}

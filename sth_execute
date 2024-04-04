@@ -4,12 +4,12 @@
 ###########################
 # MAIN ROUTINE
 #
-#   1. sth_execute {directory | pathspec } [ {driver} ]
-#      - Identical functional of sth_validate except for the generated output
-#      - Output is restricted to that the execution and not the validation process. I.e., 
-#        - no summary information is presented to stdout
-#        - no transcription of activites is presented to stderr
-#      - useful prior to the automated testing/validation process
+#   1. sth_execute {pathspec}...
+#      - Similar to `sth_validate`, but with the following differences
+#        * the validating step is skipped 
+#        * no transcript of activities are emitted to stdout
+#        * no summary information is presented
+#      - The exist status ($?) is set to the result of the last test case
 #
 
 function sth_execute () {
