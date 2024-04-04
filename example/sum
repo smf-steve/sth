@@ -11,7 +11,7 @@ function sum () {
   SUCCESS=0
   [[ $# != 2 ]] && return ${FAIL};
 
-  (( sum = lower - 1 ))                       # an intential error
+  (( sum = lower - 1 ))                       # an intentional error
   for (( i=lower; i <= upper; i ++ )) ; do
     (( sum += i ))
   done
