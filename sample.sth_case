@@ -5,15 +5,15 @@
 # In this test case, the following variables can be defined.  The last test case in 
 # this file is for the example data in the table below.
 #
-# | VARIABLE | Description                          | Example                 | Option    |
-# |----------|--------------------------------------|-------------------------|-----------|
-# | DRIVER   | The default driver program           | java_subroutine         | Parameter |
-# | OPTIONS  | The options passed to ${DRIVER}      | "-L '*.j'"              | Optional  |
-# | ENTRY    | The entry point to start testing     | binaryReal              | Required  |
-# | ARGS     | The arguments passed to ${ENTRY}     | '8 "\#"  1234 "." 43'   | Optional  |
-# | INPUT    | The filename contain the input       |                         | Optional  |
-# | OUTPUT   | The filename of the expected output  |                         | Optional  |
-# | EXITVAL  | The expected exit value ($?)         | 0                       | Optional  |
+# | VARIABLE | Description                        | Example                  | Default   |
+# |----------|------------------------------------|--------------------------|-----------|
+# | DRIVER   | The default driver program         | java_subroutine          | ""        |
+# | OPTIONS  | The options passed to ${DRIVER}    | "-L '*.j'"               | ""        |
+# | ENTRY    | The entry point to start testing   | binaryReal               |           |
+# | ARGS     | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
+# | INPUT    | The provided input (stdin)         |                          | /dev/null |
+# | OUTPUT   | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
+# | EXITVAL  | The expected exit value            | 0                        |           |
 #
 # Notes:
 #    - the value of INPUT can either be a string or a filename
@@ -21,7 +21,7 @@
 #
 # Given the above example, the following command will be executed:
 #
-#   $ cat | java_subroutine  -L '*.j'  binaryReal 8 "\#" 1234 "." 43
+#   $ cat /dev/null | java_subroutine  -L '*.j' -S binaryReal 8 "\#" 1234 "." 4300000
 # 
 # which is equivalent to 
 #
@@ -35,35 +35,22 @@ EXITVAL=0
 
 [default]
 DRIVER=java_subroutine
-OPTIONS="-L '*.j'" 
+OPTIONS="-L '*.j' -S" 
 ENTRY=binaryReal
 
+# To run the command:  echo hello this is a test case
 [case]
 DRIVER=
 OPTIONS=
 ENTRY=echo 
 ARGS='hello this is a test case'
 OUTPUT="hello this is a test case"
-EXITVAL=0
 
-[case]
-ARGS='10 \# "1234\0" . 4321'   
-OUTPUT="2# 10011010010.01101110100111100001101"
-EXITVAL=10
-
-[case]
-ARGS='16 \# FACE . DEAF'
-OUTPUT="2# 1111101011001110.11011110101010110011011"
-EXITVAL=16
-
+# To run the command:  java_subroutine  -L '*.j' -S binaryReal 8 "\#" 1234 "." 4300000
 [case]
 ARGS='8 \# 1234 . 4300000'   
 OUTPUT="2# 1010011100.100011"
-EXITVAL=8
 
-[case]
-ARGS='8 \# "1234\0" . 43'   
-OUTPUT="2# 1010011100.10001010001111010111000"
-EXITVAL=8
+
 
 
