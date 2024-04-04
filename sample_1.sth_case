@@ -4,7 +4,7 @@
 #
 # In this test case, the following variables can be defined:
 #
-# | ENV      | Description                          | Example                 | Option    |
+# | VARIABLE | Description                          | Example                 | Option    |
 # |----------|--------------------------------------|-------------------------|-----------|
 # | DRIVER   | The default driver program           | java_subroutine         | Parameter |
 # | OPTIONS  | The options passed to ${DRIVER}      | "-L '*.j'"              | Optional  |
