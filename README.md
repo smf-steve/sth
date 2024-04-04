@@ -2,13 +2,13 @@
 
    A set of scripts to facilitate automated testing of command-line programs. 
 
-   The original or primary intent of the STH system is to facilate the automated testing of Java and MIPS subroutines.  And as such, the STH system utilizes a driver program.  For our purpose, the two primary driver programs are: [java_subroutine and mips_subroutine](https://github.com/smf-steve/mips_subroutine/blob/main/README.md)
+   The original or primary intent of the STH system is to facilitate the automated testing of Java and MIPS subroutines.  And as such, the STH system utilizes a driver program.  For our purpose, the two primary driver programs are: [java_subroutine and mips_subroutine](https://github.com/smf-steve/mips_subroutine/blob/main/README.md)
 
    The STH system, however, has been developed to function without a driver program.  Hence, creating greater functionality.
 
-## Demostrative Example
+## Demonstrative Example
 
-   Consider our exampl program[^1] that calculates the sum of a series of number from 1..10.  For example.
+   Consider our example program[^1] that calculates the sum of a series of number from 1..10.  For example.
 
    ```bash
    $ sum 1 10
@@ -43,7 +43,7 @@
       Summary: 0/1  (Passed/Count)
       ```
 
-   Obviously, we don't want to execute each of these test cases manually.  The 'sth_validate' command allows you to provide a list of files, and each file is processed in term.  If one of these files is a directory, all files with a .sth_case extention is added to the list of test cases to process. 
+   Obviously, we don't want to execute each of these test cases manually.  The 'sth_validate' command allows you to provide a list of files, and each file is processed in term.  If one of these files is a directory, all files with a .sth_case extension is added to the list of test cases to process. 
 
    Consider the following example where the first argument to sth_validate is the current working directory (.).  In this case, all the files within the current working directory (.) is executed.  A summary message is provided at the end of execution.
 
@@ -99,20 +99,20 @@
    1. sth_execute {pathspec}...
       - Similar to `sth_validate`, but with the following differences
         * the validating step is skipped 
-        * no transcript of activities are emtted to stdout
+        * no transcript of activities are emitted to stdout
         * no summary information is presented
       - The exist status ($?) is set to the result of the last test case
 
 
 ## Test-case (.sth_case) File Format
 
-By convention, test-cases are defined within a file with an .sth_case extentions.  Such a file may contain one or more test cases. The file is separated into one of three types of stanzas.  One of the following labels is used to start a stanza.
+By convention, test-cases are defined within a file with an .sth_case extensions.  Such a file may contain one or more test cases. The file is separated into one of three types of stanzas.  One of the following labels is used to start a stanza.
 
-  1. The "[default]" label delinates the default values used for all test cases within the file.
-  1. The "[case]" label delinates the start of a single test case
-  1. The "[global]" label delinates the global values that override the defined values for a test case within the file.
+  1. The "[default]" label delineates the default values used for all test cases within the file.
+  1. The "[case]" label delineates the start of a single test case
+  1. The "[global]" label delineates the global values that override the defined values for a test case within the file.
 
-The processing of the file begins within an implicit "[case]" stanza.  That is to say any file without a label to start a stanze defines a single test case.
+The processing of the file begins within an implicit "[case]" stanza.  That is to say any file without a label to start a stanza defines a single test case.
 
 Within each stanza, one or more of the following variables can be defined:
 
@@ -120,7 +120,7 @@ Within each stanza, one or more of the following variables can be defined:
   |----------|------------------------------------|--------------------------|-----------|
   | DRIVER   | The default driver program         | java_subroutine          | Optional  |
   | OPTIONS  | The options passed to ${DRIVER}    | "-L '*.j'"               | Optional  |
-  | ENTRY    | The entry point to start testing   | BinaryReal               | Required  |
+  | ENTRY    | The entry point to start testing   | binaryReal               | Required  |
   | ARGS     | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | Optional  |
   | INPUT    | The provided input (stdin)         |                          | Optional  |
   | OUTPUT   | The expect output (stdout)         | "2# 1010011100.100011"   | Optional  |
@@ -130,7 +130,7 @@ Within each stanza, one or more of the following variables can be defined:
 Given the example values above, the following command line is executed by 'sth_validate'.  In the example below, we also present the expected output and return value--for a success test.
 
   ```bash 
-  $ cat | java_subroutine  -L '*.j'  BinaryReal 8 "\#" 1234 "." 43
+  $ cat | java_subroutine  -L '*.j'  binaryReal 8 "\#" 1234 "." 43
   2# 1010011100.100011
   $ echo $?
   0
@@ -155,6 +155,6 @@ You can modify the behavior of the 'sth_validate' and 'sth_execute' by the use o
   | STH_OUTPUT        | OUTPUT      |
   | STH_EXITVAL       | EXITVAL     |
 
-Additionly, you can define the STH_EXECUTE_ONLY to be "TRUE" to modify the behavior of std_validate to be quivelent to std_execute.
+Additionally, you can define the STH_EXECUTE_ONLY to be "TRUE" to modify the behavior of std_validate to be equivalent to std_execute.
 
 
