@@ -220,3 +220,36 @@ You can modify the behavior of the 'sth_validate' and 'sth_execute' by the use o
 Additionally, you can define the STH_EXECUTE_ONLY to be "TRUE" to modify the behavior of sth_validate to be equivalent to sth_execute.
 
 
+
+## Features, Limitations, Bugs:
+
+  1. Although there can only be one set of "[global]" and "[default]" VARIABLES within a sth configuration file,  both labels can occur multiple times.  All the defined variables within these stanza are merged together to create a single stanza block.  The following two configurations are equivalent:
+
+     ```
+     [global]
+     DRIVER=
+     OPTIONS=
+
+     [case]
+     ENTRY=sum
+     EXITVAL=0
+
+     [global]
+     INPUT=/dev/null
+     OUTPUT=/dev/null
+     ```
+
+     ```
+     [global]
+     DRIVER=
+     OPTIONS=
+     INPUT=/dev/null
+     OUTPUT=/dev/n
+
+     [case]
+     ENTRY=sum
+     EXITVAL=0
+     ```
+
+
+
