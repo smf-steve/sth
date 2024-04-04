@@ -15,17 +15,17 @@
 function sth_execute () {
   (
     local pathspec="$@"
-    local return_val=
+    local exit_val=
 
     STH_OLD_EXECUTE_ONLY=${STH_EXECUTE_ONLY}    
     export STH_EXECUTE_ONLY=TRUE
     
     sth_validate "$@"
-    return_val="$?"
+    exit_val="$?"
 
     STH_EXECUTE_ONLY=${STH_OLD_EXECUTE_ONLY}
     
-    return ${ret_val}
+    return ${exit_val}
   )
 }
 

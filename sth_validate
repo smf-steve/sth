@@ -29,7 +29,7 @@ export STH_TMPDIR=/tmp/STH.$$
 function sth_validate () {
   local file_dir="$@"
 
-  local return_val=
+  local exit_val=
   local count=0
   local passed=0
   local test_case=
@@ -63,20 +63,20 @@ function sth_validate () {
       [[ -n "${STH_ARGS}"    ]] && ARGS=${STH_ARGS}
       [[ -n "${STH_INPUT}"   ]] && INPUT=${STH_INPUT}
       [[ -n "${STH_OUTPUT}"  ]] && OUTPUT=${STH_OUTPUT}
-      [[ -n "${STH_RETVAL}"  ]] && RETVAL=${STH_RETVAL}
+      [[ -n "${STH_EXITVAL}" ]] && EXITVAL=${STH_EXITVAL}
 
       sth_case_validate
-      return_val=$?
+      exit_val=$?
       echo
 
-      [[ ${return_val} == 0 ]] && ((passed ++))
+      [[ ${exit_val} == 0 ]] && ((passed ++))
       (( count ++ ))
     done
   done
   rm -fr ${STH_TMPDIR}
 
   if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then
-    return ${return_val}
+    return ${exit_val}
   else
     echo "Summary: ${passed}/${count}  (Passed/Count)"
     return $((  count - passed ))
@@ -97,17 +97,17 @@ function sth_case_validate () {
     [[ ! -f ${INPUT}  ]] && SHOW_INPUT='echo'
     [[ ! -f ${OUTPUT} ]] && SHOW_OUTPUT='echo'
 
-    actual_return=
+    actual_exit_val=
     actual_output="${STH_TMPDIR}/${DRIVER}.output"      
 
     if [[ -z ${DRIVER} ]] ; then 
       echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
       ${SHOW_INPUT} ${INPUT} | eval ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS} > ${actual_output}
-      actual_return="$?"
+      actual_exit_val="$?"
     else
       echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
       ${SHOW_INPUT} ${INPUT} | ${ENTRY} ${ARGS} > ${actual_output}
-      actual_return="$?"
+      actual_exit_val="$?"
     fi     
 
     cat ${actual_output}
@@ -125,18 +125,18 @@ function sth_case_validate () {
         (( failed ++ ))
       fi
 
-      # Process the RETURN VALUE
-      if [[ ${RETVAL} != ${actual_return} ]] ; then
+      # Process the EXIT VALUE
+      if [[ ${EXITVAL} != ${actual_exit_val} ]] ; then
         echo
-        echo "# Expected Return Value: ${RETVAL}"
-        echo "# Actual   Return Value: ${actual_return}"
+        echo "# Expected Exit Value: ${EXITVAL}"
+        echo "# Actual   Exit Value: ${actual_exitval}"
         (( failed ++ ))
       fi
     fi >/dev/stderr
 
-    # Now return either the actual_return or the failed outine
+    # Now return either the actual_exit_val or the failed count
     if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
-      (( actual_return == 0 ))
+      (( actual_exitval == 0 ))
     else
       (( failed == 0 ))
     fi
