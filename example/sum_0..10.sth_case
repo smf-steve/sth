@@ -1,6 +1,5 @@
 [case]
 ENTRY=./sum
-ARGS='1 10'   
+ARGS='0 10'
 OUTPUT="55"
-RETVAL=0
-
+EXITVAL=0

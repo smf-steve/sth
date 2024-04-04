@@ -1,0 +1,70 @@
+[case]  # Implicitity for all files, the firs line contains a '[case]' label
+
+# The file case defines the following information for a single test case
+#
+# In this test case, the following variables can be defined.  The last test case in 
+# this file is for the example data in the table below.
+#
+# | ENV      | Description                          | Example                 | Option    |
+# |----------|--------------------------------------|-------------------------|-----------|
+# | DRIVER   | The default driver program           | java_subroutine         | Parameter |
+# | OPTIONS  | The options passed to ${DRIVER}      | "-L '*.j'"              | Optional  |
+# | ENTRY    | The entry point to start testing     | binaryReal              | Required  |
+# | ARGS     | The arguments passed to ${ENTRY}     | '8 "\#"  1234 "." 43'   | Optional  |
+# | INPUT    | The filename contain the input       |                         | Optional  |
+# | OUTPUT   | The filename of the expected output  |                         | Optional  |
+# | EXITVAL  | The expected exit value ($?)         | 0                       | Optional  |
+#
+# Notes:
+#    - the value of DRIVER can provided va the associated function call to the testing function
+#    - the value of INPUT can either be a string or a filename
+#    - the value of OUTPUT can either be a string or a filename
+#
+# Given the above example, the following command will be executed:
+#
+#   $ cat | java_subroutine  -L '*.j'  BinaryReal 8 "\#" 1234 "." 43
+# 
+# which is equivalent to 
+#
+#  $ cat ${INPUT} | ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS} 
+#
+# NOTE: Programmer must ensure values conform to bash quoting rules
+
+[global]
+INPUT=  
+EXITVAL=0
+
+[default]
+DRIVER=java_subroutine
+OPTIONS="-L '*.j'" 
+ENTRY=binaryReal
+
+[case]
+DRIVER=
+OPTIONS=
+ENTRY=echo 
+ARGS='hello this is a test case'
+OUTPUT="hello this is a test case"
+EXITVAL=0
+
+[case]
+ARGS='10 \# "1234\0" . 4321'   
+OUTPUT="2# 10011010010.01101110100111100001101"
+EXITVAL=10
+
+[case]
+ARGS='16 \# FACE . DEAF'
+OUTPUT="2# 1111101011001110.11011110101010110011011"
+EXITVAL=16
+
+[case]
+ARGS='8 \# 1234 . 4300000'   
+OUTPUT="2# 1010011100.100011"
+EXITVAL=8
+
+[case]
+ARGS='8 \# "1234\0" . 43'   
+OUTPUT="2# 1010011100.10001010001111010111000"
+EXITVAL=8
+
+
