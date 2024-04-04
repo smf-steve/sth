@@ -14,14 +14,13 @@
 
 function sth_execute () {
   (
-    local config="$1"
-    local driver="$2"
+    local pathspec="$@"
     local return_val=
 
     STH_OLD_EXECUTE_ONLY=${STH_EXECUTE_ONLY}    
-    STH_EXECUTE_ONLY=TRUE
+    export STH_EXECUTE_ONLY=TRUE
     
-    sth_validate "$config" ${driver}
+    sth_validate "$@"
     return_val="$?"
 
     STH_EXECUTE_ONLY=${STH_OLD_EXECUTE_ONLY}

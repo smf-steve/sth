@@ -27,8 +27,7 @@ export STH_TMPDIR=/tmp/STH.$$
 
 
 function sth_validate () {
-  local file_dir="$1"
-  local driver="$2" 
+  local file_dir="$@"
 
   local return_val=
   local count=0
@@ -36,8 +35,11 @@ function sth_validate () {
   local test_case=
 
   local files=
-  [[ -d ${file_dir} ]] && files=$(echo ${file_dir}/*.config ${file_dir}/*.case)
-  [[ -z "${files}"  ]] && files=$(echo $file_dir)
+
+  for f in ${file_dir} ; do
+     [[ -d ${f}  ]]  && files="$files $(echo ${f}/*.config ${f}/*.case)"
+     [[ -f ${f}  ]]  && files="$files $f"
+  done
 
   mkdir -p ${STH_TMPDIR}
   for f in ${files} ; do 
@@ -55,20 +57,17 @@ function sth_validate () {
       source ${STH_TMPDIR}/global
 
       # Overide Environment Variables with STH specific ENV VARABLES
-      [[ -n ${STH_DRIVER} ]]  && DRIVER=${STH_DRIVER}
-      [[ -n ${STH_OPTIONS} ]] && OPTIONS=${STH_OPTIONS}
-      [[ -n ${STH_ENTRY} ]]   && ENTRY=${STH_ENTRY}
-      [[ -n ${STH_ARGS} ]]    && ARGS=${STH_ARGS}
-      [[ -n ${STH_INPUT} ]]   && INPUT=${STH_INPUT}
-      [[ -n ${STH_OUTPUT} ]]  && OUTPUT=${STH_OUTPUT}
-      [[ -n ${STH_RETVAL} ]]  && RETVAL=${STH_RETVAL}
+      [[ -n "${STH_DRIVER}"  ]] && DRIVER=${STH_DRIVER}
+      [[ -n "${STH_OPTIONS}" ]] && OPTIONS=${STH_OPTIONS}
+      [[ -n "${STH_ENTRY}"   ]] && ENTRY=${STH_ENTRY}
+      [[ -n "${STH_ARGS}"    ]] && ARGS=${STH_ARGS}
+      [[ -n "${STH_INPUT}"   ]] && INPUT=${STH_INPUT}
+      [[ -n "${STH_OUTPUT}"  ]] && OUTPUT=${STH_OUTPUT}
+      [[ -n "${STH_RETVAL}"  ]] && RETVAL=${STH_RETVAL}
 
-      if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
-        OUTPUT=''
-        RETVAL=''
-      fi
-      sth_case_validate ${driver}
+      sth_case_validate
       return_val=$?
+      echo
 
       [[ ${return_val} == 0 ]] && ((passed ++))
       (( count ++ ))
@@ -76,7 +75,7 @@ function sth_validate () {
   done
   rm -fr ${STH_TMPDIR}
 
-  if [[ ${STH_EXECUTE_ONLY} = "TRUE" ]] ; then
+  if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then
     return ${return_val}
   else
     echo "Summary: ${passed}/${count}  (Passed/Count)"
@@ -85,18 +84,11 @@ function sth_validate () {
 }
 
 
-function sth_strip_comments () {
-  cat "$1" | sed -e '/^ *#.*/d' -e '/^ *$/d'
-}
-
 function sth_case_validate () {
   (   
-    local driver="$1"
-    local failed=2
+    local failed=0
 
-
-    [[ -n ${driver} ]] && DRIVER=${driver}
-    [[ -z ${DRIVER} ]] && { echo "Driver Program is undefined"; return 1; }
+    [[ -z ${DRIVER} ]] && DRIVER=${eval} && OPTIONS=""
     [[ -z ${INPUT}  ]] && INPUT=/dev/null
     [[ -z ${OUTPUT} ]] && OUTPUT=/dev/null
 
@@ -108,46 +100,48 @@ function sth_case_validate () {
     actual_return=
     actual_output="${STH_TMPDIR}/${DRIVER}.output"      
 
-    echo "Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
-    ${SHOW_INPUT} ${INPUT} | eval ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS} > ${actual_output}
-    actual_return="$?"
+    if [[ -z ${DRIVER} ]] ; then 
+      echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
+      ${SHOW_INPUT} ${INPUT} | eval ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS} > ${actual_output}
+      actual_return="$?"
+    else
+      echo "# Testing: ${DRIVER} ${OPTIONS} ${ENTRY} ${ARGS}"  >$(tty)
+      ${SHOW_INPUT} ${INPUT} | ${ENTRY} ${ARGS} > ${actual_output}
+      actual_return="$?"
+    fi     
 
-    # PROCESS the OUTPUT
-    if [[ ${OUTPUT} != '/dev/null' ]] ; then
+    cat ${actual_output}
+    # Provide a transcript of activities
+    if [[ ${STH_EXECUTE_ONLY} != "TRUE" ]] ; then 
+      # PROCESS stdout
       ${SHOW_OUTPUT} ${OUTPUT} | diff -q - ${actual_output} >/dev/null
-      if [[  $? != 0 ]] ; then
-        echo "    Error: Incorrect Output"
-        echo
+      output_error=$?
+      if [[  ${output_error} != 0 ]] ; then
+        echo "# =========================="
+        echo "# Error: Correct Output is:"
+        echo "# =========================="
+        ${SHOW_OUTPUT}  ${OUTPUT}
+        echo "# =========================="
         (( failed ++ ))
       fi
-      echo "Correct Output followed by Your Output"
-      echo "=============="
-      ${SHOW_OUTPUT}  ${OUTPUT}
-      echo "=============="
-      cat  ${actual_output} 
-      echo "=============="
-      rm -f ${actual_output}
-    else
-      cat ${actual_output}  >$(tty)
-    fi
-    rm -f ${actual_output}
 
-    # Process the RETURN VALUE
-    if [[ -n ${RETVAL} ]] ; then
+      # Process the RETURN VALUE
       if [[ ${RETVAL} != ${actual_return} ]] ; then
-        echo "    Error: Expected Return Value: ${RETVAL}"
-        echo "           Your Return Value: ${actual_return}"
+        echo
+        echo "# Expected Return Value: ${RETVAL}"
+        echo "# Actual   Return Value: ${actual_return}"
         (( failed ++ ))
       fi
-    fi 
+    fi >/dev/stderr
+
+    # Now return either the actual_return or the failed outine
     if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
-      return ${actual_return}
+      (( actual_return == 0 ))
     else
-      echo
       (( failed == 0 ))
     fi
   )
- } > /dev/stderr
+ }
 
 
 function sth_config_reader () {
@@ -174,6 +168,11 @@ function sth_config_reader () {
                       ;;
     esac
   done < <( sth_strip_comments ${config_file} )
+}
+
+
+function sth_strip_comments () {
+  cat "$1" | sed -e '/^ *#.*/d' -e '/^ *$/d'
 }
 
 
