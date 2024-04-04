@@ -1,0 +1,6 @@
+[case]
+ENTRY=./sum
+ARGS='1 10'   
+OUTPUT="55"
+RETVAL=0
+

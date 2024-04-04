@@ -1,0 +1,24 @@
+#! /bin/bash
+
+
+# Computes the summation from lower to upper of i
+function sum () {
+  lower="$1"
+  upper="$2"
+
+
+  FAIL=1
+  SUCCESS=0
+  [[ $# != 2 ]] && return ${FAIL};
+
+  (( sum = lower - 1 ))                       # an intential error
+  for (( i=lower; i <= upper; i ++ )) ; do
+    (( sum += i ))
+  done
+
+  echo ${sum}
+  return ${SUCCESS}
+
+}
+
+sum "$@"
