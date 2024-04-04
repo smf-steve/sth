@@ -81,7 +81,7 @@ function sth_validate () {
   if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then
     return ${exit_val}
   else
-    echo "Summary: ${passed}/${count}  (Passed/Count)"
+    echo "Summary: ${passed}/${count}  (Passed/Count)"  >$(tty)
     return $((  count - passed ))
   fi
 }
@@ -132,14 +132,14 @@ function sth_case_validate () {
       if [[ ${EXITVAL} != ${actual_exit_val} ]] ; then
         echo
         echo "# Expected Exit Value: ${EXITVAL}"
-        echo "# Actual   Exit Value: ${actual_exitval}"
+        echo "# Actual   Exit Value: ${actual_exit_val}"
         (( failed ++ ))
       fi
     fi >/dev/stderr
 
     # Now return either the actual_exit_val or the failed count
     if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then 
-      (( actual_exitval == 0 ))
+      (( actual_exit_val == 0 ))
     else
       (( failed == 0 ))
     fi
