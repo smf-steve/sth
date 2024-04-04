@@ -47,6 +47,7 @@ function sth_validate () {
   mkdir -p ${STH_TMPDIR}
   for f in ${files} ; do 
     [[ ! -s $f ]] && continue
+    [[ $f != *.sth_case ]] && continue
 
     rm -rf ${STH_TMPDIR}/*
     sth_config_reader ${f}
@@ -68,6 +69,12 @@ function sth_validate () {
       [[ -n "${STH_OUTPUT}"  ]] && OUTPUT=${STH_OUTPUT}
       [[ -n "${STH_EXITVAL}" ]] && EXITVAL=${STH_EXITVAL}
 
+      # Check that the required VARIABLES are defined
+      if [[ -z ${ENTRY} ]]  ||  [[ -z ${EXITVAL} ]] ; then
+        echo "Error: Invalid test case in ${f}, skipping..." >$(tty)
+        continue
+      fi
+
       sth_case_validate
       exit_val=$?
       echo
@@ -76,6 +83,10 @@ function sth_validate () {
       (( count ++ ))
     done
   done
+  if (( count == 0 )) ; then 
+     echo "Error: No files with a .sth_case extension provided." >$(tty)
+     return 1
+  fi
   rm -fr ${STH_TMPDIR}
 
   if [[ ${STH_EXECUTE_ONLY} == "TRUE" ]] ; then
@@ -94,6 +105,7 @@ function sth_case_validate () {
     [[ -z ${DRIVER} ]] && DRIVER=${eval} && OPTIONS=""
     [[ -z ${INPUT}  ]] && INPUT=/dev/null
     [[ -z ${OUTPUT} ]] && OUTPUT=/dev/null
+
 
     SHOW_INPUT='cat'
     SHOW_OUTPUT='cat'
