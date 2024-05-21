@@ -5,15 +5,15 @@
 # In this test case, the following variables can be defined.  The last test case in 
 # this file is for the example data in the table below.
 #
-#  | VARIABLE    | Description                        | Example                  | Default   |
-#  |-------------|------------------------------------|--------------------------|-----------|
-#  | DRIVER      | The default driver program         | java_subroutine          | ""        |
-#  | OPTIONS     | The options passed to ${DRIVER}    | "-L ."                   | ""        |
-#  | ENTRY       | The entry point to start testing   | binaryReal               |           |
-#  | ARGS        | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
-#  | INPUT       | The provided input (stdin)         |                          | /dev/null |
-#  | OUTPUT      | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
-#  | EXIT_STATUS | The expected exit value            | 0                        |           |
+# | VARIABLE    | Description                        | Example                  | Default   |
+# |-------------|------------------------------------|--------------------------|-----------|
+# | DRIVER      | The default driver program         | java_subroutine          | ""        |
+# | OPTIONS     | The options passed to ${DRIVER}    | "-L ."                   | ""        |
+# | ENTRY       | The entry point to start testing   | binaryReal               |           |
+# | ARGS        | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
+# | INPUT       | The provided input (stdin)         |                          | /dev/null |
+# | OUTPUT      | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
+# | EXIT_STATUS | The expected exit value            | 0                        |           |
 #
 # Notes:
 #    - Both ENTRY and EXIT_STATUS must defined (and may not be the empty string)
