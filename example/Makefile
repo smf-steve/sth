@@ -1,0 +1,2 @@
+all:
+	sth_execute .
