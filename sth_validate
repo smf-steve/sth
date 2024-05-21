@@ -67,12 +67,12 @@ function sth_validate () {
       [[ -n "${STH_ARGS}"    ]] && ARGS=${STH_ARGS}
       [[ -n "${STH_INPUT}"   ]] && INPUT=${STH_INPUT}
       [[ -n "${STH_OUTPUT}"  ]] && OUTPUT=${STH_OUTPUT}
-      [[ -n "${STH_EXITVAL}" ]] && EXITVAL=${STH_EXITVAL}
+      [[ -n "${STH_EXIT_STATUS}" ]] && EXIT_STATUS=${STH_EXIT_STATUS}
 
       # Check that the required VARIABLES are defined
       { 
         [[ -z "${ENTRY}" ]]   && { echo "Error: Invalid test in ${f}, missing \"ENTRY\", skipping..."  ; continue; } 
-        [[ -z "${EXITVAL}" ]] && { echo "Error: Invalid test in ${f}, missing \"EXITVAL\" skipping..." ; continue; }
+        [[ -z "${EXIT_STATUS}" ]] && { echo "Error: Invalid test in ${f}, missing \"EXIT_STATUS\" skipping..." ; continue; }
       } > /dev/stderr
 
       sth_case_validate
@@ -133,7 +133,7 @@ function sth_case_validate () {
     ${SHOW_OUTPUT} ${OUTPUT} | diff -q - ${actual_output} >/dev/null
     output_error=$?
 
-    [[ ${EXITVAL} == ${actual_exit_val} ]]
+    [[ ${EXIT_STATUS} == ${actual_exit_status} ]]
     exit_error=$?
 
     if [[ ${output_error} != 0 ]] || [[ ${exit_error} != 0 ]] ; then
@@ -156,10 +156,10 @@ function sth_case_validate () {
       fi
 
       # Process the EXIT VALUE
-      if [[ ${EXITVAL} != ${actual_exit_val} ]] ; then
+      if [[ ${EXIT_STATUS} != ${actual_exit_stats} ]] ; then
         echo
-        echo "# Expected Exit Value: ${EXITVAL}"
-        echo "# Actual   Exit Value: ${actual_exit_val}"
+        echo "# Expected Exit Value: ${EXIT_STATUS}"
+        echo "# Actual   Exit Value: ${actual_exit_status}"
       fi
     fi 
 

@@ -1,27 +1,28 @@
-[case]  # Implicitly for all files, the first line contains a '[case]' label
+# [case] : Implicitly for all files, the first line contains a '[case]' label
 
 # The file case defines the following information for a single test case
 #
 # In this test case, the following variables can be defined.  The last test case in 
 # this file is for the example data in the table below.
 #
-# | VARIABLE | Description                        | Example                  | Default   |
-# |----------|------------------------------------|--------------------------|-----------|
-# | DRIVER   | The default driver program         | java_subroutine          | ""        |
-# | OPTIONS  | The options passed to ${DRIVER}    | "-L '*.j'"               | ""        |
-# | ENTRY    | The entry point to start testing   | binaryReal               |           |
-# | ARGS     | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
-# | INPUT    | The provided input (stdin)         |                          | /dev/null |
-# | OUTPUT   | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
-# | EXITVAL  | The expected exit value            | 0                        |           |
+#  | VARIABLE    | Description                        | Example                  | Default   |
+#  |-------------|------------------------------------|--------------------------|-----------|
+#  | DRIVER      | The default driver program         | java_subroutine          | ""        |
+#  | OPTIONS     | The options passed to ${DRIVER}    | "-L ."                   | ""        |
+#  | ENTRY       | The entry point to start testing   | binaryReal               |           |
+#  | ARGS        | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
+#  | INPUT       | The provided input (stdin)         |                          | /dev/null |
+#  | OUTPUT      | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
+#  | EXIT_STATUS | The expected exit value            | 0                        |           |
 #
 # Notes:
+#    - Both ENTRY and EXIT_STATUS must defined (and may not be the empty string)
 #    - the value of INPUT can either be a string or a filename
 #    - the value of OUTPUT can either be a string or a filename
 #
 # Given the above example, the following command will be executed:
 #
-#   $ cat /dev/null | java_subroutine  -L '*.j' -S binaryReal 8 "\#" 1234 "." 4300000
+#   $ cat /dev/null | java_subroutine  -L . -S binaryReal 8 "\#" 1234 "." 4300000
 # 
 # which is equivalent to 
 #
@@ -31,11 +32,11 @@
 
 [global]
 INPUT=  
-EXITVAL=0
+EXIT_STATUS=0
 
 [default]
 DRIVER=java_subroutine
-OPTIONS="-L '*.j' -S" 
+OPTIONS="-L . -S" 
 ENTRY=binaryReal
 
 # To run the command:  echo hello this is a test case
@@ -46,7 +47,7 @@ ENTRY=echo
 ARGS='hello this is a test case'
 OUTPUT="hello this is a test case"
 
-# To run the command:  java_subroutine  -L '*.j' -S binaryReal 8 "\#" 1234 "." 4300000
+# To run the command:  java_subroutine  -L . -S binaryReal 8 "\#" 1234 "." 4300000
 [case]
 ARGS='8 \# 1234 . 4300000'   
 OUTPUT="2# 1010011100.100011"

@@ -123,7 +123,7 @@ In COMP122, we use the program `java_subroutine` to unit test an individual Java
 The following command line illustrates the execution of the `binaryReal` subroutines to convert "8# 1234.43" to binary.
 
   ```bash 
-  $ cat /dev/null | java_subroutine  -L '*.j' -S binaryReal 8 "\#" 1234 "." 43
+  $ cat /dev/null | java_subroutine  -L . -S binaryReal 8 "\#" 1234 "." 43
   2# 1010011100.100011
   $ echo $?
   0
@@ -143,11 +143,11 @@ Notice that the exit value of `sth_validate` is 0.  This indicates that ALL test
   $ head -20 binaryReal.sth_case 
   [global]
   INPUT=  
-  EXITVAL=0
+  EXIT_STATUS=0
   
   [default]
   DRIVER=java_subroutine
-  OPTIONS="-L '*.j'" 
+  OPTIONS="-L ." 
   ENTRY=binaryReal
   
   [case]
@@ -171,28 +171,28 @@ By convention, test-cases are defined within a file with an .sth_case extensions
 
   1. The "[default]" label delineates the default values used for all test cases within the file.
   1. The "[case]" label delineates the start of a single test case
-  1. The "[global]" label delineates the global values that override the defined values for a test case within the file.
+  1. The "[global]" label delineates the global values which override all values associated with a test case.
 
 The processing of the file begins within an implicit "[case]" stanza.  That is to say any file without a label to start a stanza defines a single test case.
 
 Within each stanza, two or more of the following variables can be defined:
 
-  | VARIABLE | Description                        | Example                  | Default   |
-  |----------|------------------------------------|--------------------------|-----------|
-  | DRIVER   | The default driver program         | java_subroutine          | ""        |
-  | OPTIONS  | The options passed to ${DRIVER}    | "-L '*.j'"               | ""        |
-  | ENTRY    | The entry point to start testing   | binaryReal               |           |
-  | ARGS     | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
-  | INPUT    | The provided input (stdin)         |                          | /dev/null |
-  | OUTPUT   | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
-  | EXITVAL  | The expected exit value            | 0                        |           |
+  | VARIABLE    | Description                        | Example                  | Default   |
+  |-------------|------------------------------------|--------------------------|-----------|
+  | DRIVER      | The default driver program         | java_subroutine          | ""        |
+  | OPTIONS     | The options passed to ${DRIVER}    | "-L ."                   | ""        |
+  | ENTRY       | The entry point to start testing   | binaryReal               |           |
+  | ARGS        | The arguments passed to ${ENTRY}   | '8 \# 1234 "." 4300000'  | ""        |
+  | INPUT       | The provided input (stdin)         |                          | /dev/null |
+  | OUTPUT      | The expected output (stdout)       | "2# 1010011100.100011"   | /dev/null |
+  | EXIT_STATUS | The expected exit value            | 0                        |           |
 
-Notice that there are no default values for ENTRY and EXITVAL; these values must be defined.
+Notice that there are no default values for ENTRY and EXIT_STATUS; these values must be defined.
 
 Given the example values above, the following command line is executed by 'sth_validate'.  In the example below, we also present the expected output and return value--for a success test.
 
   ```bash 
-  $ cat /dev/null | java_subroutine  -L '*.j' -S binaryReal 8 "\#" 1234 "." 4300000
+  $ cat /dev/null | java_subroutine  -L . -S binaryReal 8 "\#" 1234 "." 4300000
   2# 1010011100.100011
   $ echo $?
   0
@@ -215,7 +215,7 @@ You can modify the behavior of the 'sth_validate' and 'sth_execute' by the use o
   | STH_ARGS          | ARGS        |
   | STH_INPUT         | INPUT       |
   | STH_OUTPUT        | OUTPUT      |
-  | STH_EXITVAL       | EXITVAL     |
+  | STH_EXIT_STATUS   | EXIT_STATUS |
 
 Additionally, you can define the STH_EXECUTE_ONLY to be "TRUE" to modify the behavior of sth_validate to be equivalent to sth_execute.
 
@@ -225,31 +225,34 @@ Additionally, you can define the STH_EXECUTE_ONLY to be "TRUE" to modify the beh
 
   1. Although there can only be one set of "[global]" and "[default]" VARIABLES within a sth configuration file,  both labels can occur multiple times.  All the defined variables within these stanza are merged together to create a single stanza block.  The following two configurations are equivalent:
 
+     1. Example where the "[global]" stanza directives are presented together.
+        ```
+        [global]
+        DRIVER=
+        OPTIONS=
+        INPUT=/dev/null
+        OUTPUT=/dev/n
+         
+        [case]
+        ENTRY=sum
+        EXIT_STATUS=0
      ```
-     [global]
-     DRIVER=
-     OPTIONS=
 
-     [case]
-     ENTRY=sum
-     EXITVAL=0
+     1. Example where the "[global]" stanza directives are split into two sections.
+         ```
+         [global]
+         DRIVER=
+         OPTIONS=
+           
+         [case]
+         ENTRY=sum
+         EXIT_STATUS=0
+         
+         [global]
+         INPUT=/dev/null
+         OUTPUT=/dev/null
+         ```
 
-     [global]
-     INPUT=/dev/null
-     OUTPUT=/dev/null
-     ```
-
-     ```
-     [global]
-     DRIVER=
-     OPTIONS=
-     INPUT=/dev/null
-     OUTPUT=/dev/n
-
-     [case]
-     ENTRY=sum
-     EXITVAL=0
-     ```
 
 
 

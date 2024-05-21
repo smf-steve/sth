@@ -2,5 +2,5 @@
 ENTRY=./sum
 ARGS='1 10'   
 OUTPUT="55"
-EXITVAL=0
+EXIT_STATUS=0
 
