@@ -22,7 +22,7 @@
 #
 # Given the above example, the following command will be executed:
 #
-#   $ cat /dev/null | java_subroutine  -L . -S binaryReal 8 "\#" 1234 "." 4300000
+#   $ cat /dev/null | java_subroutine -R null -L . -S binaryReal 8 "\#" 1234 "." 4300000
 # 
 # which is equivalent to 
 #
@@ -36,7 +36,7 @@ EXIT_STATUS=0
 
 [default]
 DRIVER=java_subroutine
-OPTIONS="-L . -S" 
+OPTIONS="-R null -L . -S" 
 ENTRY=binaryReal
 
 # To run the command:  echo hello this is a test case
@@ -47,7 +47,7 @@ ENTRY=echo
 ARGS='hello this is a test case'
 OUTPUT="hello this is a test case"
 
-# To run the command:  java_subroutine  -L . -S binaryReal 8 "\#" 1234 "." 4300000
+# To run the command:  java_subroutine -R null -L . -S binaryReal 8 "\#" 1234 "." 4300000
 [case]
 ARGS='8 \# 1234 . 4300000'   
 OUTPUT="2# 1010011100.100011"
