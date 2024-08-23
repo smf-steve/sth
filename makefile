@@ -1,4 +1,4 @@
-SRC =  .
+STH_HOME ?=  .
 DST ?= /tmp
 
 install: bin 
@@ -6,7 +6,7 @@ install: bin
 .PHONY: bin 
 bin:
 	-mkdir -p ${DST}/bin 2> /dev/null
-	-cp bin/sth_* ${DST}/bin
-	-cp README.md ${DST}/bin/sth.md
+	-cp ${STH_HOME}/bin/sth_* ${DST}/bin
+	-cp ${STH_HOME}/README.md ${DST}/bin/sth.md
 
 
